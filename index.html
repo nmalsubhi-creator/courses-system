@@ -6,9 +6,11 @@
 
 <style>
 body {font-family: Arial; direction: rtl; text-align:center; background:#f5f5f5;}
-.container {background:white; padding:20px; margin:20px auto; width:90%; max-width:600px; border-radius:10px;}
+.container {background:white; padding:20px; margin:20px auto; width:90%; max-width:700px; border-radius:10px;}
 input, button {width:90%; padding:10px; margin:5px;}
 button {background:#007bff; color:white; border:none; cursor:pointer;}
+table {width:100%; margin-top:15px; border-collapse: collapse;}
+td, th {border:1px solid #ccc; padding:8px;}
 </style>
 
 </head>
@@ -22,34 +24,63 @@ button {background:#007bff; color:white; border:none; cursor:pointer;}
 <input id="year" placeholder="السنة">
 <input id="type" placeholder="نوع الدورة">
 
-<!-- الزر الصحيح -->
 <button onclick="send()">إرسال</button>
+<button onclick="loadData()">عرض البيانات</button>
 
 <p id="msg"></p>
+
+<table id="table">
+<thead>
+<tr>
+<th>الاسم</th>
+<th>الدورة</th>
+<th>السنة</th>
+<th>النوع</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
 </div>
 
 <script>
-const url = "https://username.github.io/courses-system/";
+const url = "https://script.google.com/macros/s/AKfycbzVeH-hAg9TntmQg1VHM6hOZmSoUHWEbRNK0jAGPN_7yor__LuukDqhwKRSibXjnI190w/exec";
 
+// إرسال
 function send(){
 let d = new URLSearchParams();
 
-d.append("name", document.getElementById("name").value);
-d.append("course", document.getElementById("course").value);
-d.append("year", document.getElementById("year").value);
-d.append("type", document.getElementById("type").value);
+d.append("name", name.value);
+d.append("course", course.value);
+d.append("year", year.value);
+d.append("type", type.value);
 
-fetch(url, {method:"POST", body:d})
-.then(res => res.text())
-.then(data => {
-    document.getElementById("msg").innerText = "✅ تم الحفظ";
-})
-.catch(err => {
-    document.getElementById("msg").innerText = "❌ حصل خطأ";
+fetch(url,{method:"POST", body:d})
+.then(()=> {
+msg.innerText="✅ تم الحفظ";
+loadData();
+});
+}
+
+// عرض البيانات
+function loadData(){
+fetch(url)
+.then(res=>res.json())
+.then(data=>{
+let rows="";
+data.forEach(d=>{
+rows+=`
+<tr>
+<td>${d.name}</td>
+<td>${d.course}</td>
+<td>${d.year}</td>
+<td>${d.type}</td>
+</tr>`;
+});
+table.querySelector("tbody").innerHTML=rows;
 });
 }
 </script>
 
 </body>
 </html>
-
