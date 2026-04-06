@@ -85,116 +85,17 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 const url = "https://script.google.com/macros/s/AKfycbypXJCrGCpMCj2KLTJMnDEGHB0xmHitEJTMNgHpEIiR8QQFtEa17SNXr75KWusBL9P7IA/exec";
 
 // حفظ (إضافة + تعديل)
-function send(){
-  let d = new URLSearchParams();
-
-  d.append("action","add"); // 🔥 مهم جداً
-  d.append("name",name.value);
-  d.append("course",course.value);
-  d.append("year",year.value);
-  d.append("type",type.value);
-
-  fetch(url,{
-    method:"POST",
-    body:d
-  })
-  .then(res => res.text())
-  .then(data=>{
-    console.log(data);
-    msg.innerText="✅ تم الحفظ";
-  })
-  .catch(err=>{
-    console.error(err);
-    msg.innerText="❌ خطأ في الإرسال";
-  });
-}
-
-// حذف
-function del(id){
-  if(confirm("حذف؟")){
-    let d=new URLSearchParams();
-    d.append("action","delete");
-    d.append("id",id);
-
-    fetch(url,{method:"POST",body:d})
-    .then(()=>load());
-  }
-}
-
-// تعديل
-function edit(d){
-  name.value = d.name;
-  course.value = d.course;
-  year.value = d.year;
-  type.value = d.type;
-
-  editId = d.id;
-}
-
-// تحميل
-function load(){
-  fetch(url)
-  .then(r=>r.json())
-  .then(data=>{
-    allData=data;
-    render(data);
-  });
-}
-
-// عرض
-function render(data){
-  let rows="";
-
-  data.forEach(d=>{
-    rows+=`
-    <tr>
-    <td>${d.id}</td>
-    <td>${d.name}</td>
-    <td>${d.course}</td>
-    <td>${d.year}</td>
-    <td>${d.type}</td>
-    <td>
-    <button class="btn-edit" onclick='edit(${JSON.stringify(d)})'>تعديل</button>
-    <button class="btn-del" onclick="del('${d.id}')">حذف</button>
-    </td>
-    </tr>`;
-  });
-
-  document.querySelector("#table tbody").innerHTML=rows;
-}
-
-// بحث
-function filter(){
-  let v=search.value.toLowerCase();
-  render(allData.filter(d=>d.name.toLowerCase().includes(v)));
-}
-
-// تنظيف
-function clearForm(){
-  name.value="";
-  course.value="";
-  year.value="";
-  type.value="";
-  editId=null;
-}
-  function printPage(){
-  document.getElementById("date").innerText =
-    new Date().toLocaleDateString();
-
-  window.print();
-}
-  function doGet(e) {
-
+function doPost(e) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("courses");
 
-  // 🔥 هنا المكان الصحيح
-  if (e.parameter.action == "add") {
+  if (!e || !e.parameter) {
+    return ContentService.createTextOutput("No data");
+  }
 
-    // إنشاء العناوين إذا أول مرة
-    if (sheet.getLastRow() == 0) {
-      sheet.appendRow(["ID","الاسم","الدورة","السنة","النوع","التاريخ"]);
-    }
+  const action = e.parameter.action;
 
+  // إضافة
+  if (action == "add") {
     const id = new Date().getTime();
 
     sheet.appendRow([
@@ -205,6 +106,62 @@ function clearForm(){
       e.parameter.type || "",
       new Date()
     ]);
+  }
+
+  // حذف
+  if (action == "delete") {
+    const id = e.parameter.id;
+    const data = sheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] == id) {
+        sheet.deleteRow(i + 1);
+        break;
+      }
+    }
+  }
+
+  // تعديل
+  if (action == "edit") {
+    const id = e.parameter.id;
+    const data = sheet.getDataRange().getValues();
+
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] == id) {
+        sheet.getRange(i + 1, 2, 1, 4).setValues([[
+          e.parameter.name || "",
+          e.parameter.course || "",
+          e.parameter.year || "",
+          e.parameter.type || ""
+        ]]);
+        break;
+      }
+    }
+  }
+
+  return ContentService.createTextOutput("ok");
+}
+
+function doGet() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("courses");
+  const data = sheet.getDataRange().getValues();
+
+  let result = [];
+
+  for (let i = 1; i < data.length; i++) {
+    result.push({
+      id: data[i][0],
+      name: data[i][1],
+      course: data[i][2],
+      year: data[i][3],
+      type: data[i][4]
+    });
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
 
 load();
