@@ -1,28 +1,146 @@
-<!DOCTYPE html> 
-<html lang="ar"> 
-    <head> 
-        <meta charset="UTF-8"> 
-        <title>نظام إدارة الدورات</title> 
-        <style> body { font-family: "Tahoma", Arial; direction: rtl; margin: 0; background: #f1f4f8; } /* الهيدر */ .header { background: #0b3d2e; color: white; padding: 15px; text-align: center; font-size: 20px; } /* الحاوية */ .container { width: 95%; max-width: 900px; margin: 20px auto; } /* الكرت */ .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); } /* العناوين */ h2 { margin-bottom: 15px; color: #0b3d2e; } /* الحقول */ input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; } /* الأزرار */ button { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin-top: 5px; } .btn-primary { background: #0b3d2e; color: white; width: 100%; } .btn-secondary { background: #6c757d; color: white; width: 100%; } /* الجدول */ table { width: 100%; border-collapse: collapse; margin-top: 10px; } th { background: #0b3d2e; color: white; } td, th { padding: 10px; border: 1px solid #ddd; text-align: center; } tr:nth-child(even) { background: #f9f9f9; } /* رسالة */ #msg { margin-top: 10px; font-weight: bold; } /* متجاوب */ @media (max-width: 600px) { th, td { font-size: 12px; padding: 6px; } } </style>
-     </head>
-      <body> 
-        <div class="header"> 🏛️ نظام إدارة الدورات التدريبية </div> 
-        <div class="container"> <!-- نموذج الإدخال --> <div class="card"> <h2>تسجيل دورة جديدة</h2> 
-            <form id="form" target="hidden_iframe" method="POST" action="https://script.google.com/macros/s/AKfycbzVeH-hAg9TntmQg1VHM6hOZmSoUHWEbRNK0jAGPN_7yor__LuukDqhwKRSibXjnI190w/exec"> 
-                <input name="name" placeholder="اسم الموظف" required>
-                 <input name="course" placeholder="اسم الدورة" required>
-                 <input name="year" placeholder="السنة" required> 
-                 <input name="type" placeholder="نوع الدورة" required> 
-                 <button type="submit" class="btn-primary">حفظ البيانات</button> 
-                </form> <p id="msg"></p> </div> <!-- عرض البيانات --> <div class="card"> 
-                    <h2>سجل الدورات</h2>
-                     <button onclick="loadData()" class="btn-secondary">تحديث البيانات</button>
-                      <table id="table"> <thead> 
-                        <tr> <th>الاسم</th> 
-                            <th>الدورة</th> 
-                            <th>السنة</th> 
-                            <th>النوع</th>
-                         </tr> 
-                        </thead> 
-                        <tbody></tbody> </table> </div> </div> <iframe name="hidden_iframe" style="display:none;"></iframe> 
-                        <script> const url = "https://script.google.com/macros/s/AKfycbzVeH-hAg9TntmQg1VHM6hOZmSoUHWEbRNK0jAGPN_7yor__LuukDqhwKRSibXjnI190w/exec"; // عند الإرسال document.getElementById("form").addEventListener("submit", function(){ document.getElementById("msg").innerText = "⏳ جاري الحفظ..."; setTimeout(()=>{ document.getElementById("msg").innerText = "✅ تم الحفظ بنجاح"; loadData(); },1500); }); // تحميل البيانات function loadData(){ fetch(url) .then(res=>res.json()) .then(data=>{ let rows=""; data.forEach(d=>{ rows+=` <tr> <td>${d.name}</td> <td>${d.course}</td> <td>${d.year}</td> <td>${d.type}</td> </tr>`; }); document.querySelector("#table tbody").innerHTML = rows; }); } // تحميل تلقائي loadData(); </script> </body> </html>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>نظام إدارة الدورات الرسمي</title>
+
+<style>
+body {font-family:tahoma; direction:rtl; margin:0; background:#eef2f7;}
+.header {background:#0b3d2e; color:#fff; padding:15px; text-align:center;}
+
+.container {max-width:1100px; margin:auto; padding:10px;}
+
+.card {background:#fff; padding:15px; margin:10px 0; border-radius:10px;}
+
+input {width:100%; padding:10px; margin:5px 0;}
+
+button {padding:8px; border:none; border-radius:5px; cursor:pointer;}
+
+.btn-save {background:#0b3d2e; color:#fff;}
+.btn-del {background:red; color:#fff;}
+.btn-print {background:#007bff; color:#fff;}
+
+table {width:100%; border-collapse:collapse;}
+th {background:#0b3d2e; color:#fff;}
+td,th {border:1px solid #ddd; padding:8px; text-align:center;}
+</style>
+</head>
+
+<body>
+
+<div class="header">🏛️ نظام إدارة الدورات - جهة حكومية</div>
+
+<div class="container">
+
+<div class="card">
+<h3>إضافة دورة</h3>
+
+<input id="name" placeholder="اسم الموظف">
+<input id="course" placeholder="الدورة">
+<input id="year" placeholder="السنة">
+<input id="type" placeholder="النوع">
+
+<button class="btn-save" onclick="add()">حفظ</button>
+<p id="msg"></p>
+</div>
+
+<div class="card">
+<h3>بحث</h3>
+<input id="search" placeholder="ابحث..." onkeyup="filter()">
+<button class="btn-print" onclick="printPage()">طباعة</button>
+</div>
+
+<div class="card">
+<table id="table">
+<thead>
+<tr>
+<th>رقم</th>
+<th>الاسم</th>
+<th>الدورة</th>
+<th>السنة</th>
+<th>النوع</th>
+<th>إدارة</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+const url = "https://script.google.com/macros/s/AKfycbzX1HnwNiNA1Nu5OJu_hUo5W-qD0AuZ4q5WImEUyS6A9K7ImB3v-YwlNDr2z7E5px_H/exec";
+
+let allData=[];
+
+// إضافة
+function add(){
+let d=new URLSearchParams();
+d.append("action","add");
+d.append("name",name.value);
+d.append("course",course.value);
+d.append("year",year.value);
+d.append("type",type.value);
+
+fetch(url,{method:"POST",body:d,mode:"no-cors"})
+.then(()=>{
+msg.innerText="✅ تم الحفظ";
+load();
+});
+}
+
+// حذف
+function del(id){
+if(confirm("هل تريد الحذف؟")){
+let d=new URLSearchParams();
+d.append("action","delete");
+d.append("id",id);
+
+fetch(url,{method:"POST",body:d,mode:"no-cors"})
+.then(()=>load());
+}
+}
+
+// تحميل
+function load(){
+fetch(url)
+.then(r=>r.json())
+.then(data=>{
+allData=data;
+render(data);
+});
+}
+
+// عرض
+function render(data){
+let rows="";
+data.forEach(d=>{
+rows+=`
+<tr>
+<td>${d.id}</td>
+<td>${d.name}</td>
+<td>${d.course}</td>
+<td>${d.year}</td>
+<td>${d.type}</td>
+<td><button class="btn-del" onclick="del('${d.id}')">حذف</button></td>
+</tr>`;
+});
+table.querySelector("tbody").innerHTML=rows;
+}
+
+// بحث
+function filter(){
+let val=search.value.toLowerCase();
+render(allData.filter(d=>d.name.toLowerCase().includes(val)));
+}
+
+// طباعة
+function printPage(){
+window.print();
+}
+
+load();
+</script>
+
+</body>
+</html>
