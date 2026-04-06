@@ -34,12 +34,15 @@ button {background:#007bff; color:white;}
 <script>
 const url = "https://nmalsubhi-creator.github.io/courses-system/ ";
 
-function send(){
-let d=new URLSearchParams();
-d.append("name",name.value);
-d.append("course",course.value);
-d.append("year",year.value);
-d.append("type",type.value);
+fetch(url, {
+  method: "POST",
+  body: new URLSearchParams({
+    name: document.getElementById("name").value,
+    course: document.getElementById("course").value,
+    year: document.getElementById("year").value,
+    type: document.getElementById("type").value
+  })
+});
 
 fetch(url,{method:"POST",body:d})
 .then(()=>msg.innerText="✅ تم الحفظ");
