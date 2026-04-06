@@ -88,28 +88,22 @@ let editId = null;
 let allData = [];
 
 // حفظ (إضافة + تعديل)
-function save(){
-  if(!name.value || !course.value){
-    msg.innerText="⚠️ عبئ البيانات";
-    return;
-  }
+function send(){
+let d = new URLSearchParams();
 
-  let link = url +
-    "?action=" + (editId ? "edit&id="+editId : "add") +
-    "&name=" + encodeURIComponent(name.value) +
-    "&course=" + encodeURIComponent(course.value) +
-    "&year=" + encodeURIComponent(year.value) +
-    "&type=" + encodeURIComponent(type.value);
+d.append("name", document.getElementById("name").value);
+d.append("course", document.getElementById("course").value);
+d.append("year", document.getElementById("year").value);
+d.append("type", document.getElementById("type").value);
 
-  fetch(link)
-  .then(()=> {
-    msg.innerText="✅ تم الحفظ";
-    clearForm();
-    load();
-  })
-  .catch(()=> {
-    msg.innerText="❌ فشل الإرسال";
-  });
+fetch(url, {method:"POST", body:d})
+.then(res => res.text())
+.then(data => {
+    document.getElementById("msg").innerText = "✅ تم الحفظ";
+})
+.catch(err => {
+    document.getElementById("msg").innerText = "❌ حصل خطأ";
+});
 }
 
 // حذف
