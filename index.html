@@ -22,6 +22,22 @@ button {padding:8px; border:none; border-radius:5px; cursor:pointer;}
 table {width:100%; border-collapse:collapse;}
 th {background:#0b3d2e; color:#fff;}
 td,th {border:1px solid #ddd; padding:8px; text-align:center;}
+  @media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #printArea, #printArea * {
+    visibility: visible;
+  }
+
+  #printArea {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+  }
+}
 </style>
 </head>
 
@@ -40,7 +56,26 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 <button class="btn-save" onclick="save()">حفظ</button>
 <p id="msg"></p>
 </div>
+<div id="printArea">
 
+<h2 style="text-align:center;">🏛️ سجل الدورات التدريبية</h2>
+<p>تاريخ الطباعة: <span id="date"></span></p>
+
+<table id="table">
+<thead>
+<tr>
+<th>رقم</th>
+<th>الاسم</th>
+<th>الدورة</th>
+<th>السنة</th>
+<th>النوع</th>
+<th>إدارة</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+</div>
 <div class="card">
 <input id="search" placeholder="بحث..." onkeyup="filter()">
 <button class="btn-print" onclick="window.print()">طباعة</button>
@@ -166,6 +201,12 @@ function clearForm(){
   year.value="";
   type.value="";
   editId=null;
+}
+  function printPage(){
+  document.getElementById("date").innerText =
+    new Date().toLocaleDateString();
+
+  window.print();
 }
 
 load();
