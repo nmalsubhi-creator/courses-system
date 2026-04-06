@@ -85,23 +85,22 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 const url = "https://script.google.com/macros/s/AKfycbypXJCrGCpMCj2KLTJMnDEGHB0xmHitEJTMNgHpEIiR8QQFtEa17SNXr75KWusBL9P7IA/exec";
 
 // حفظ (إضافة + تعديل)
-if (action == "add") {
+function send(){
 
-  // إذا الشيت فاضي → أنشئ العناوين
-  if (sheet.getLastRow() == 0) {
-    sheet.appendRow(["ID","الاسم","الدورة","السنة","النوع","التاريخ"]);
-  }
+  let link = url + 
+    "?action=add" +
+    "&name=" + encodeURIComponent(name.value) +
+    "&course=" + encodeURIComponent(course.value) +
+    "&year=" + encodeURIComponent(year.value) +
+    "&type=" + encodeURIComponent(type.value);
 
-  const id = new Date().getTime();
-
-  sheet.appendRow([
-    id,
-    e.parameter.name || "",
-    e.parameter.course || "",
-    e.parameter.year || "",
-    e.parameter.type || "",
-    new Date()
-  ]);
+  fetch(link)
+  .then(()=> {
+    msg.innerText="✅ تم الحفظ";
+  })
+  .catch(()=> {
+    msg.innerText="❌ فشل الإرسال";
+  });
 }
 
   // حذف
