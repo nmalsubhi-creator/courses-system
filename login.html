@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>تسجيل دخول</title>
+<style>
+body {font-family: Arial; text-align:center; margin-top:100px;}
+input, button {padding:10px; margin:5px;}
+</style>
+</head>
+<body>
+
+<h2>🔐 دخول المدير</h2>
+
+<input type="password" id="pass" placeholder="كلمة المرور">
+<br>
+<button onclick="login()">دخول</button>
+
+<script>
+function login() {
+  if (document.getElementById("pass").value === "1234") {
+    window.location.href = "dashboard.html";
+  } else {
+    alert("❌ كلمة المرور خاطئة");
+  }
+}
+</script>
+
+</body>
+</html>

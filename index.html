@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>نظام الدورات</title>
+<style>
+body {font-family: Arial; direction: rtl; text-align:center; background:#f5f5f5;}
+.container {background:white; padding:20px; margin:20px auto; width:90%; max-width:600px; border-radius:10px;}
+input, button {width:90%; padding:10px; margin:5px;}
+button {background:#007bff; color:white;}
+</style>
+</head>
+<body>
+
+
+<div class="container">
+<h2>📋 تسجيل دورة</h2>
+
+
+<input id="name" placeholder="اسم الموظف">
+<input id="course" placeholder="اسم الدورة">
+<input id="year" placeholder="السنة">
+<input id="type" placeholder="نوع الدورة">
+
+
+إرسال
+
+<p id="msg"></p>
+</div>
+
+
+<script>
+const url = "PUT_YOUR_SCRIPT_URL";
+
+function send(){
+let d=new URLSearchParams();
+d.append("name",name.value);
+d.append("course",course.value);
+d.append("year",year.value);
+d.append("type",type.value);
+
+fetch(url,{method:"POST",body:d})
+.then(()=>msg.innerText="✅ تم الحفظ");
+}
+</script>
+
+
+</body>
+</h>
+

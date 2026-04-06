@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>VIP</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="direction:rtl">
+
+
+<h2>👑 لوحة المدير</h2>
+
+
+<div id="stats"></div>
+
+
+
+
+
+<table border="1" width="100%">
+<thead>
+<tr><th>الاسم</th><th>الدورة</th><th>السنة</th><th>النوع</th></tr>
+</thead>
+<tbody id="t"></tbody>
+</table>
+
+
+<script>
+const url="PUT_YOUR_SCRIPT_URL";
+
+fetch(url)
+.then(r=>r.json())
+.then(res=>{
+let d=res.data, s=res.stats;
+
+stats.innerHTML=`
+📚 ${s.totalCourses}
+👨‍💼 ${Object.keys(s.employees).length}
+`;
+
+d.forEach(r=>{
+t.innerHTML+=`<tr>
+<td>${r[0]}</td>
+<td>${r[1]}</td>
+<td>${r[2]}</td>
+<td>${r[3]}</td>
+</tr>`;
+});
+
+new Chart(c1,{type:'bar',
+data:{labels:Object.keys(s.years),
+datasets:[{data:Object.values(s.years)}]}
+});
+
+new Chart(c2,{type:'pie',
+data:{labels:Object.keys(s.types),
+datasets:[{data:Object.values(s.types)}]}
+});
+
+});
+</script>
+
+
+</body>
+</html>
