@@ -85,27 +85,29 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 const url = "https://script.google.com/macros/s/AKfycbypXJCrGCpMCj2KLTJMnDEGHB0xmHitEJTMNgHpEIiR8QQFtEa17SNXr75KWusBL9P7IA/exec";
 
 // حفظ (إضافة + تعديل)
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("courses");
-  // حماية من الخطأ
-  if (!e || !e.parameter) {
-    return ContentService.createTextOutput("No data");
-  }
+function send(){
+  let d = new URLSearchParams();
 
-  const action = e.parameter.action;
+  d.append("action","add"); // 🔥 مهم جداً
+  d.append("name",name.value);
+  d.append("course",course.value);
+  d.append("year",year.value);
+  d.append("type",type.value);
 
-  if (action == "add") {
-    const id = new Date().getTime();
-
-    sheet.appendRow([
-      id,
-      e.parameter.name || "",
-      e.parameter.course || "",
-      e.parameter.year || "",
-      e.parameter.type || "",
-      new Date()
-    ]);
-  }
+  fetch(url,{
+    method:"POST",
+    body:d
+  })
+  .then(res => res.text())
+  .then(data=>{
+    console.log(data);
+    msg.innerText="✅ تم الحفظ";
+  })
+  .catch(err=>{
+    console.error(err);
+    msg.innerText="❌ خطأ في الإرسال";
+  });
+}
 
 // حذف
 function del(id){
