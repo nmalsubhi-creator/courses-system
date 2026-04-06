@@ -1,67 +1,146 @@
 <!DOCTYPE html>
-
-
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>VIP</title>
+<title>لوحة VIP</title>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {font-family: Arial; direction: rtl; background:#f4f6f9;}
+.container {width:95%; margin:auto;}
+.box {display:inline-block; width:23%; margin:1%; padding:20px; background:white; border-radius:10px; text-align:center;}
+canvas {background:white; margin-top:20px; padding:10px; border-radius:10px;}
+table {width:100%; margin-top:20px; border-collapse: collapse; background:white;}
+td, th {border:1px solid #ddd; padding:8px;}
+input {padding:8px; margin:5px;}
+button {padding:10px; margin:5px;}
+</style>
 </head>
-<body style="direction:rtl">
+<body>
 
+<div class="container">
 
-<h2>👑 لوحة المدير</h2>
+<h2>👑 لوحة تحكم VIP</h2>
 
+<div class="box">📚 <br> <span id="total"></span></div>
+<div class="box">👨‍💼 <br> <span id="emp"></span></div>
+<div class="box">🏆 <br> <span id="topEmp"></span></div>
+<div class="box">🔥 <br> <span id="topType"></span></div>
 
-<div id="stats"></div>
+<canvas id="yearChart"></canvas>
+<canvas id="typeChart"></canvas>
 
+<h3>🔍 البحث</h3>
+<input id="name" placeholder="اسم الموظف">
+<input id="year" placeholder="السنة">
+<input id="type" placeholder="نوع الدورة">
+<button onclick="loadData()">بحث</button>
 
+<button onclick="exportPDF()">📥 PDF</button>
+<button onclick="exportExcel()">📥 Excel</button>
 
-
-
-<table border="1" width="100%">
+<table>
 <thead>
-<tr><th>الاسم</th><th>الدورة</th><th>السنة</th><th>النوع</th></tr>
+<tr>
+<th>الاسم</th>
+<th>الدورة</th>
+<th>السنة</th>
+<th>النوع</th>
+<th>التاريخ</th>
+</tr>
 </thead>
-<tbody id="t"></tbody>
+<tbody id="tbody"></tbody>
 </table>
 
+</div>
 
 <script>
-const url = "https://nmalsubhi-creator.github.io/courses-system/ ";
+const url = "ضع_رابط_AppsScript";
 
-fetch(url)
-.then(r=>r.json())
-.then(res=>{
-let d=res.data, s=res.stats;
+let globalData = [];
 
-stats.innerHTML=`
-📚 ${s.totalCourses}
-👨‍💼 ${Object.keys(s.employees).length}
-`;
+function loadData() {
+  fetch(url)
+    .then(res => res.json())
+    .then(res => {
 
-d.forEach(r=>{
-t.innerHTML+=`<tr>
-<td>${r[0]}</td>
-<td>${r[1]}</td>
-<td>${r[2]}</td>
-<td>${r[3]}</td>
-</tr>`;
-});
+      let data = res.data;
+      let stats = res.stats;
+      globalData = data;
 
-new Chart(c1,{type:'bar',
-data:{labels:Object.keys(s.years),
-datasets:[{data:Object.values(s.years)}]}
-});
+      document.getElementById("total").innerText = stats.totalCourses;
+      document.getElementById("emp").innerText = Object.keys(stats.employees).length;
 
-new Chart(c2,{type:'pie',
-data:{labels:Object.keys(s.types),
-datasets:[{data:Object.values(s.types)}]}
-});
+      let topEmp = Object.entries(stats.employees).sort((a,b)=>b[1]-a[1])[0];
+      document.getElementById("topEmp").innerText = topEmp ? topEmp[0] : "-";
 
-});
+      let topType = Object.entries(stats.types).sort((a,b)=>b[1]-a[1])[0];
+      document.getElementById("topType").innerText = topType ? topType[0] : "-";
+
+      drawCharts(stats);
+      renderTable(data);
+    });
+}
+
+function renderTable(data) {
+  let name = document.getElementById("name").value;
+  let year = document.getElementById("year").value;
+  let type = document.getElementById("type").value;
+
+  let tbody = document.getElementById("tbody");
+  tbody.innerHTML = "";
+
+  data.forEach(row => {
+    if ((name=="" || row[0].includes(name)) &&
+        (year=="" || row[2]==year) &&
+        (type=="" || row[3].includes(type))) {
+
+      tbody.innerHTML += `<tr>
+        <td>${row[0]}</td>
+        <td>${row[1]}</td>
+        <td>${row[2]}</td>
+        <td>${row[3]}</td>
+        <td>${row[4]}</td>
+      </tr>`;
+    }
+  });
+}
+
+function drawCharts(stats) {
+  new Chart(document.getElementById("yearChart"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(stats.years),
+      datasets: [{ data: Object.values(stats.years) }]
+    }
+  });
+
+  new Chart(document.getElementById("typeChart"), {
+    type: "pie",
+    data: {
+      labels: Object.keys(stats.types),
+      datasets: [{ data: Object.values(stats.types) }]
+    }
+  });
+}
+
+function exportExcel() {
+  let table = document.querySelector("table").outerHTML;
+  let a = document.createElement("a");
+  a.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(table);
+  a.download = 'report.xls';
+  a.click();
+}
+
+function exportPDF() {
+  window.print();
+}
+
+// تحميل تلقائي
+loadData();
 </script>
-
 
 </body>
 </html>
+
