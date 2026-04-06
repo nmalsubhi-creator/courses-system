@@ -23,7 +23,23 @@ button {padding:8px; border:none; border-radius:5px; cursor:pointer;}
 table {width:100%; border-collapse:collapse;}
 th {background:#0b3d2e; color:#fff;}
 td,th {border:1px solid #ddd; padding:8px; text-align:center;}
-</style>
+ @media print {
+body * {
+    visibility: hidden;
+}
+
+#printArea, #printArea * {
+    visibility: visible;
+}
+
+#printArea {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+}
+}
+ </style>
 </head>
 
 <body>
@@ -51,19 +67,20 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 </div>
 
 <div class="card">
+<div id="printArea">
+<h2 style="text-align:center;">🏛️ سجل الدورات التدريبية</h2>
+<p style="text-align:left;">تاريخ الطباعة: <span id="date"></span></p>
 <table id="table">
 <thead>
 <tr>
 <th>رقم</th>
 <th>الاسم</th>
-<th>الدورة</th>
-<th>السنة</th>
-<th>النوع</th>
-<th>إدارة</th>
-</tr>
+<th>الدورة</th> 
+<th> </th> <th> </th> <th> </th> </tr> <tbody></tbody> </table> </div>السنة
+النوع
+إدارة
+
 </thead>
-<tbody></tbody>
-</table>
 </div>
 
 </div>
@@ -140,6 +157,7 @@ window.print();
 }
 
 load();
+ document.getElementById("date").innerText = new Date().toLocaleDateString();
 </script>
 
 </body>
