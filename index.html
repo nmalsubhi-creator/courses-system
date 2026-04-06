@@ -88,23 +88,27 @@ let editId = null;
 let allData = [];
 
 // حفظ (إضافة + تعديل)
-function send(){
-let d = new URLSearchParams();
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("courses");
+  // حماية من الخطأ
+  if (!e || !e.parameter) {
+    return ContentService.createTextOutput("No data");
+  }
 
-d.append("name", document.getElementById("name").value);
-d.append("course", document.getElementById("course").value);
-d.append("year", document.getElementById("year").value);
-d.append("type", document.getElementById("type").value);
+  const action = e.parameter.action;
 
-fetch(url, {method:"POST", body:d})
-.then(res => res.text())
-.then(data => {
-    document.getElementById("msg").innerText = "✅ تم الحفظ";
-})
-.catch(err => {
-    document.getElementById("msg").innerText = "❌ حصل خطأ";
-});
-}
+  if (action == "add") {
+    const id = new Date().getTime();
+
+    sheet.appendRow([
+      id,
+      e.parameter.name || "",
+      e.parameter.course || "",
+      e.parameter.year || "",
+      e.parameter.type || "",
+      new Date()
+    ]);
+  }
 
 // حذف
 function del(id){
@@ -180,6 +184,29 @@ function clearForm(){
 
   window.print();
 }
+  function doGet(e) {
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("courses");
+
+  // 🔥 هنا المكان الصحيح
+  if (e.parameter.action == "add") {
+
+    // إنشاء العناوين إذا أول مرة
+    if (sheet.getLastRow() == 0) {
+      sheet.appendRow(["ID","الاسم","الدورة","السنة","النوع","التاريخ"]);
+    }
+
+    const id = new Date().getTime();
+
+    sheet.appendRow([
+      id,
+      e.parameter.name || "",
+      e.parameter.course || "",
+      e.parameter.year || "",
+      e.parameter.type || "",
+      new Date()
+    ]);
+
 
 load();
 </script>
