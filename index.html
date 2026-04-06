@@ -6,12 +6,6 @@
 
 <style>
 body {font-family:tahoma; direction:rtl; background:#eef2f7;}
-.header {background:#0b3d2e; color:#fff; padding:15px; text-align:center;}
-  fetch(url,{
-  method:"POST",
-  body:d,
-  mode:"no-cors"
-})
 .then(()=>{
   msg.innerText="✅ تم الإرسال (تحقق من الشيت)";
 });
@@ -65,50 +59,31 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 <p id="msg"></p>
 </div>
 <div id="printArea">
-
+  <div class="card">
+<table id="table">
+<thead>
+<tr>
+<th>رقم</th>
+<th>الاسم</th>
+<th>الدورة</th>
+<th>السنة</th>
+<th>النوع</th>
+<th>إدارة</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
 <h2 style="text-align:center;">🏛️ سجل الدورات التدريبية</h2>
 <p>تاريخ الطباعة: <span id="date"></span></p>
 
-<table id="table">
-<thead>
-<tr>
-<th>رقم</th>
-<th>الاسم</th>
-<th>الدورة</th>
-<th>السنة</th>
-<th>النوع</th>
-<th>إدارة</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-
-</div>
 <div class="card">
 <input id="search" placeholder="بحث..." onkeyup="filter()">
-<button class="btn-print" onclick="window.print()">طباعة</button>
+<button class="btn-print" onclick="printPage()">طباعة</button>
 </div>
-
-<div class="card">
-<table id="table">
-<thead>
-<tr>
-<th>رقم</th>
-<th>الاسم</th>
-<th>الدورة</th>
-<th>السنة</th>
-<th>النوع</th>
-<th>إدارة</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
-
-</div>
-
 <script>
-const url = "https://script.google.com/macros/s/AKfycbymTEuO7KfwEsj8z3slADV8qkf-qrYG7OtIG8k2y5m5tInN0bNtRlbBAtZRlrAmpaGS5A/exec";
+const url = "https://script.google.com/macros/s/AKfycbyaZa57IyApa7F0QRdb466etOYydYoTgPnhMRXUxt4YkcPk1O0w8Z9nrEulDPKQFAjP/exec";
 
 let editId = null;
 let allData = [];
@@ -120,25 +95,21 @@ function save(){
     return;
   }
 
-  let d=new URLSearchParams();
+  let link = url +
+    "?action=" + (editId ? "edit&id="+editId : "add") +
+    "&name=" + encodeURIComponent(name.value) +
+    "&course=" + encodeURIComponent(course.value) +
+    "&year=" + encodeURIComponent(year.value) +
+    "&type=" + encodeURIComponent(type.value);
 
-  if(editId){
-    d.append("action","edit");
-    d.append("id",editId);
-  } else {
-    d.append("action","add");
-  }
-
-  d.append("name",name.value);
-  d.append("course",course.value);
-  d.append("year",year.value);
-  d.append("type",type.value);
-
-  fetch(url,{method:"POST",body:d})
-  .then(()=>{
+  fetch(link)
+  .then(()=> {
     msg.innerText="✅ تم الحفظ";
     clearForm();
     load();
+  })
+  .catch(()=> {
+    msg.innerText="❌ فشل الإرسال";
   });
 }
 
