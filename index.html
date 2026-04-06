@@ -49,12 +49,13 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 
 <div class="container">
 <h2>📋 تسجيل دورة</h2>
-<input id="name" placeholder="اسم الموظف">
-<input id="course" placeholder="الدورة">
-<input id="year" placeholder="السنة">
-<input id="type" placeholder="النوع">
-
-<button onclick="send()">إرسال</button>
+  <form action="https://nmalsubhi-creator.github.io/courses-system/" method="POST">
+  <input type="text" name="name" placeholder="اسم الموظف" required><br>
+  <input type="text" name="course" placeholder="اسم الدورة" required><br>
+  <input type="number" name="year" placeholder="السنة" required><br>
+  <input type="text" name="type" placeholder="نوع الدورة"><br>
+  <button type="submit">إرسال</button>
+</form>
 <p id="msg"></p>
 </div>
 <div id="printArea">
