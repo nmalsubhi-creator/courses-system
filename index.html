@@ -85,28 +85,24 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 const url = "https://script.google.com/macros/s/AKfycbypXJCrGCpMCj2KLTJMnDEGHB0xmHitEJTMNgHpEIiR8QQFtEa17SNXr75KWusBL9P7IA/exec";
 
 // حفظ (إضافة + تعديل)
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("courses");
+if (action == "add") {
 
-  if (!e || !e.parameter) {
-    return ContentService.createTextOutput("No data");
+  // إذا الشيت فاضي → أنشئ العناوين
+  if (sheet.getLastRow() == 0) {
+    sheet.appendRow(["ID","الاسم","الدورة","السنة","النوع","التاريخ"]);
   }
 
-  const action = e.parameter.action;
+  const id = new Date().getTime();
 
-  // إضافة
-  if (action == "add") {
-    const id = new Date().getTime();
-
-    sheet.appendRow([
-      id,
-      e.parameter.name || "",
-      e.parameter.course || "",
-      e.parameter.year || "",
-      e.parameter.type || "",
-      new Date()
-    ]);
-  }
+  sheet.appendRow([
+    id,
+    e.parameter.name || "",
+    e.parameter.course || "",
+    e.parameter.year || "",
+    e.parameter.type || "",
+    new Date()
+  ]);
+}
 
   // حذف
   if (action == "delete") {
