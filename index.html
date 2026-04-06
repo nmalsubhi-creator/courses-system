@@ -88,6 +88,10 @@ msg.innerText="✅ تم الحفظ";
 load();
 });
 }
+if(!name.value || !course.value){
+msg.innerText="⚠️ تأكد من تعبئة الحقول";
+return;
+}
 
 // حذف
 function del(id){
