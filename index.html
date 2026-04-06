@@ -5,159 +5,170 @@
 <title>نظام إدارة الدورات الرسمي</title>
 
 <style>
-body {font-family:tahoma; direction:rtl; margin:0; background:#eef2f7;}
+body {font-family:tahoma; direction:rtl; background:#eef2f7;}
 .header {background:#0b3d2e; color:#fff; padding:15px; text-align:center;}
 
-.container {max-width:1100px; margin:auto; padding:10px;}
-
-.card {background:#fff; padding:15px; margin:10px 0; border-radius:10px;}
+.container {max-width:1100px; margin:auto;}
+.card {background:#fff; padding:15px; margin:10px; border-radius:10px;}
 
 input {width:100%; padding:10px; margin:5px 0;}
 
 button {padding:8px; border:none; border-radius:5px; cursor:pointer;}
-
 .btn-save {background:#0b3d2e; color:#fff;}
 .btn-del {background:red; color:#fff;}
+.btn-edit {background:orange; color:#fff;}
 .btn-print {background:#007bff; color:#fff;}
 
 table {width:100%; border-collapse:collapse;}
 th {background:#0b3d2e; color:#fff;}
 td,th {border:1px solid #ddd; padding:8px; text-align:center;}
- @media print {
-body * {
-    visibility: hidden;
-}
-
-#printArea, #printArea * {
-    visibility: visible;
-}
-
-#printArea {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-}
-}
- </style>
+</style>
 </head>
 
 <body>
 
-<div class="header">🏛️ نظام إدارة الدورات - جهة حكومية</div>
+<div class="header">🏛️ نظام إدارة الدورات</div>
 
 <div class="container">
 
 <div class="card">
-<h3>إضافة دورة</h3>
-
 <input id="name" placeholder="اسم الموظف">
 <input id="course" placeholder="الدورة">
 <input id="year" placeholder="السنة">
 <input id="type" placeholder="النوع">
 
-<button class="btn-save" onclick="add()">حفظ</button>
+<button class="btn-save" onclick="save()">حفظ</button>
 <p id="msg"></p>
 </div>
 
 <div class="card">
-<h3>بحث</h3>
-<input id="search" placeholder="ابحث..." onkeyup="filter()">
-<button class="btn-print" onclick="printPage()">طباعة</button>
+<input id="search" placeholder="بحث..." onkeyup="filter()">
+<button class="btn-print" onclick="window.print()">طباعة</button>
 </div>
 
 <div class="card">
-<div id="printArea">
-<h2 style="text-align:center;">🏛️ سجل الدورات التدريبية</h2>
-<p style="text-align:left;">تاريخ الطباعة: <span id="date"></span></p>
 <table id="table">
 <thead>
 <tr>
 <th>رقم</th>
 <th>الاسم</th>
-<th>الدورة</th> 
-<th> </th> <th> </th> <th> </th> </tr> <tbody></tbody> </table> </div>السنة
-النوع
-إدارة
-
+<th>الدورة</th>
+<th>السنة</th>
+<th>النوع</th>
+<th>إدارة</th>
+</tr>
 </thead>
+<tbody></tbody>
+</table>
 </div>
 
 </div>
 
 <script>
-const url = "https://script.google.com/macros/s/AKfycbx0c6sWB6C59DdgQ5A9qeNjSdnnr7gmakn7E2m9O2gaV8LedLo-a-GbMjZQjUgFiRWpNA/exec";
+const url = "https://script.google.com/macros/s/AKfycbxMnz_IrHTdRYQ8lAqd-H5-h0wJMDB1wx2Ouy3Gi8nAJWvIDTOpjP9YASifaSmCmzujUw/exec";
 
-let allData=[];
+let editId = null;
+let allData = [];
 
-// إضافة
-function add(){
-let d=new URLSearchParams();
-d.append("action","add");
-d.append("name",name.value);
-d.append("course",course.value);
-d.append("year",year.value);
-d.append("type",type.value);
+// حفظ (إضافة + تعديل)
+function save(){
+  if(!name.value || !course.value){
+    msg.innerText="⚠️ عبئ البيانات";
+    return;
+  }
 
-fetch(url,{method:"POST",body:d,mode:"no-cors"})
-.then(()=>{
-msg.innerText="✅ تم الحفظ";
-load();
-});
-}
-if(!name.value || !course.value){
-msg.innerText="⚠️ تأكد من تعبئة الحقول";
-return;
+  let d=new URLSearchParams();
+
+  if(editId){
+    d.append("action","edit");
+    d.append("id",editId);
+  } else {
+    d.append("action","add");
+  }
+
+  d.append("name",name.value);
+  d.append("course",course.value);
+  d.append("year",year.value);
+  d.append("type",type.value);
+
+  fetch(url,{method:"POST",body:d})
+  .then(()=>{
+    msg.innerText="✅ تم الحفظ";
+    clearForm();
+    load();
+  });
 }
 
 // حذف
 function del(id){
-if(confirm("هل تريد الحذف؟")){
-let d=new URLSearchParams();
-d.append("action","delete");
-d.append("id",id);
+  if(confirm("حذف؟")){
+    let d=new URLSearchParams();
+    d.append("action","delete");
+    d.append("id",id);
 
-fetch(url,{method:"POST",body:d,mode:"no-cors"})
-.then(()=>load());
+    fetch(url,{method:"POST",body:d})
+    .then(()=>load());
+  }
 }
+
+// تعديل
+function edit(d){
+  name.value = d.name;
+  course.value = d.course;
+  year.value = d.year;
+  type.value = d.type;
+
+  editId = d.id;
 }
 
 // تحميل
 function load(){
-fetch(url)
-.then(r=>r.json())
-.then(data=>{
-allData=data;
-render(data);
-});
+  fetch(url)
+  .then(r=>r.json())
+  .then(data=>{
+    allData=data;
+    render(data);
+  });
 }
 
 // عرض
-function render(data){ let rows=""; data.for بيانات
- صفوفrows+=` <tr> <td>${d.id || ""}</""
-forEach( d => { rows 
+function render(data){
+  let rows="";
 
-+ = `<tr><td>${d.id || " 
-" 
-} </td> <td> $ { d.name || " " } </td> <td> $ { d.course || " " } </td> <td> $ { d.year || ""}</td><td>${ d.type || " " } </td> <td> < button class = " btn - del " onclick = " del ( ' $ { d.id } ' ) " > حذف < / button > </td></td>
-</tr>`;
-});
-table.querySelector("tbody").innerHTML=rows;
+  data.forEach(d=>{
+    rows+=`
+    <tr>
+    <td>${d.id}</td>
+    <td>${d.name}</td>
+    <td>${d.course}</td>
+    <td>${d.year}</td>
+    <td>${d.type}</td>
+    <td>
+    <button class="btn-edit" onclick='edit(${JSON.stringify(d)})'>تعديل</button>
+    <button class="btn-del" onclick="del('${d.id}')">حذف</button>
+    </td>
+    </tr>`;
+  });
+
+  document.querySelector("#table tbody").innerHTML=rows;
 }
 
 // بحث
 function filter(){
-let val=search.value.toLowerCase();
-render(allData.filter(d=>d.name.toLowerCase().includes(val)));
+  let v=search.value.toLowerCase();
+  render(allData.filter(d=>d.name.toLowerCase().includes(v)));
 }
 
-// طباعة
-function printPage(){
-window.print();
+// تنظيف
+function clearForm(){
+  name.value="";
+  course.value="";
+  year.value="";
+  type.value="";
+  editId=null;
 }
 
 load();
- document.getElementById("date").innerText = new Date().toLocaleDateString();
 </script>
 
 </body>
