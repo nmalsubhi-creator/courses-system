@@ -6,9 +6,7 @@
 
 <style>
 body {font-family:tahoma; direction:rtl; background:#eef2f7;}
-.then(()=>{
-  msg.innerText="✅ تم الإرسال (تحقق من الشيت)";
-});
+.header {background:#0b3d2e; color:#fff; padding:15px; text-align:center;}
 
 .container {max-width:1100px; margin:auto;}
 .card {background:#fff; padding:15px; margin:10px; border-radius:10px;}
@@ -24,22 +22,6 @@ button {padding:8px; border:none; border-radius:5px; cursor:pointer;}
 table {width:100%; border-collapse:collapse;}
 th {background:#0b3d2e; color:#fff;}
 td,th {border:1px solid #ddd; padding:8px; text-align:center;}
-  @media print {
-  body * {
-    visibility: hidden;
-  }
-
-  #printArea, #printArea * {
-    visibility: visible;
-  }
-
-  #printArea {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-  }
-}
 </style>
 </head>
 
@@ -48,17 +30,23 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 <div class="header">🏛️ نظام إدارة الدورات</div>
 
 <div class="container">
-  
-  <input type="text" name="name" placeholder="اسم الموظف" required><br>
-  <input type="text" name="course" placeholder="اسم الدورة" required><br>
-  <input type="number" name="year" placeholder="السنة" required><br>
-  <input type="text" name="type" placeholder="نوع الدورة" required><br>
-  <button onclick="send()">إرسال</button>
 
+<div class="card">
+<input id="name" placeholder="اسم الموظف">
+<input id="course" placeholder="الدورة">
+<input id="year" placeholder="السنة">
+<input id="type" placeholder="النوع">
+
+<button class="btn-save" onclick="save()">حفظ</button>
 <p id="msg"></p>
 </div>
-<div id="printArea">
-  <div class="card">
+
+<div class="card">
+<input id="search" placeholder="بحث..." onkeyup="filter()">
+<button class="btn-print" onclick="window.print()">طباعة</button>
+</div>
+
+<div class="card">
 <table id="table">
 <thead>
 <tr>
@@ -73,91 +61,112 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 <tbody></tbody>
 </table>
 </div>
-</div>
-<h2 style="text-align:center;">🏛️ سجل الدورات التدريبية</h2>
-<p>تاريخ الطباعة: <span id="date"></span></p>
 
-<div class="card">
-<input id="search" placeholder="بحث..." onkeyup="filter()">
-<button class="btn-print" onclick="printPage()">طباعة</button>
 </div>
+
 <script>
-const url = "https://script.google.com/macros/s/AKfycbzAPusP5mPKzPbTMA9FxyFTuU9eTFVTV-AyU-Tjyiw0--rYJ12Ste7W8grwpI-_Oiqw7g/exec";
+const url = "https://script.google.com/macros/s/AKfycbxE2Ynt3d5e-pWYceKYXeeChyhQsj0UzP8nY0NIZhzt__jKZQSjBCuT5N7cUgLJePFJhQ/exec";
+
+let editId = null;
+let allData = [];
 
 // حفظ (إضافة + تعديل)
-function send(){
+function save(){
+  if(!name.value || !course.value){
+    msg.innerText="⚠️ عبئ البيانات";
+    return;
+  }
 
-  let link = url + 
-    "?action=add" +
-    "&name=" + encodeURIComponent(name.value) +
-    "&course=" + encodeURIComponent(course.value) +
-    "&year=" + encodeURIComponent(year.value) +
-    "&type=" + encodeURIComponent(type.value);
+  let d=new URLSearchParams();
 
-  fetch(link)
-  .then(()=> {
+  if(editId){
+    d.append("action","edit");
+    d.append("id",editId);
+  } else {
+    d.append("action","add");
+  }
+
+  d.append("name",name.value);
+  d.append("course",course.value);
+  d.append("year",year.value);
+  d.append("type",type.value);
+
+  fetch(url,{method:"POST",body:d})
+  .then(()=>{
     msg.innerText="✅ تم الحفظ";
-  })
-  .catch(()=> {
-    msg.innerText="❌ فشل الإرسال";
+    clearForm();
+    load();
   });
 }
 
-  // حذف
-  if (action == "delete") {
-    const id = e.parameter.id;
-    const data = sheet.getDataRange().getValues();
+// حذف
+function del(id){
+  if(confirm("حذف؟")){
+    let d=new URLSearchParams();
+    d.append("action","delete");
+    d.append("id",id);
 
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] == id) {
-        sheet.deleteRow(i + 1);
-        break;
-      }
-    }
+    fetch(url,{method:"POST",body:d})
+    .then(()=>load());
   }
-
-  // تعديل
-  if (action == "edit") {
-    const id = e.parameter.id;
-    const data = sheet.getDataRange().getValues();
-
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] == id) {
-        sheet.getRange(i + 1, 2, 1, 4).setValues([[
-          e.parameter.name || "",
-          e.parameter.course || "",
-          e.parameter.year || "",
-          e.parameter.type || ""
-        ]]);
-        break;
-      }
-    }
-  }
-
-  return ContentService.createTextOutput("ok");
 }
 
-function doGet() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("courses");
-  const data = sheet.getDataRange().getValues();
+// تعديل
+function edit(d){
+  name.value = d.name;
+  course.value = d.course;
+  year.value = d.year;
+  type.value = d.type;
 
-  let result = [];
-
-  for (let i = 1; i < data.length; i++) {
-    result.push({
-      id: data[i][0],
-      name: data[i][1],
-      course: data[i][2],
-      year: data[i][3],
-      type: data[i][4]
-    });
-  }
-
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
+  editId = d.id;
 }
 
+// تحميل
+function load(){
+  fetch(url)
+  .then(r=>r.json())
+  .then(data=>{
+    allData=data;
+    render(data);
+  });
+}
+
+// عرض
+function render(data){
+  let rows="";
+
+  data.forEach(d=>{
+    rows+=`
+    <tr>
+    <td>${d.id}</td>
+    <td>${d.name}</td>
+    <td>${d.course}</td>
+    <td>${d.year}</td>
+    <td>${d.type}</td>
+    <td>
+    <button class="btn-edit" onclick='edit(${JSON.stringify(d)})'>تعديل</button>
+    <button class="btn-del" onclick="del('${d.id}')">حذف</button>
+    </td>
+    </tr>`;
+  });
+
+  document.querySelector("#table tbody").innerHTML=rows;
+}
+
+// بحث
+function filter(){
+  let v=search.value.toLowerCase();
+  render(allData.filter(d=>d.name.toLowerCase().includes(v)));
+}
+
+// تنظيف
+function clearForm(){
+  name.value="";
+  course.value="";
+  year.value="";
+  type.value="";
+  editId=null;
+}
 
 load();
 </script>
