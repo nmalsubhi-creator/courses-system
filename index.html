@@ -112,17 +112,13 @@ render(data);
 }
 
 // عرض
-function render(data){
-let rows="";
-data.forEach(d=>{
-rows+=`
-<tr>
-<td>${d.id}</td>
-<td>${d.name}</td>
-<td>${d.course}</td>
-<td>${d.year}</td>
-<td>${d.type}</td>
-<td><button class="btn-del" onclick="del('${d.id}')">حذف</button></td>
+function render(data){ let rows=""; data.for بيانات
+ صفوفrows+=` <tr> <td>${d.id || ""}</""
+forEach( d => { rows 
+
++ = `<tr><td>${d.id || " 
+" 
+} </td> <td> $ { d.name || " " } </td> <td> $ { d.course || " " } </td> <td> $ { d.year || ""}</td><td>${ d.type || " " } </td> <td> < button class = " btn - del " onclick = " del ( ' $ { d.id } ' ) " > حذف < / button > </td></td>
 </tr>`;
 });
 table.querySelector("tbody").innerHTML=rows;
