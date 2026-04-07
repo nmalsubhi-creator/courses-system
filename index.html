@@ -83,17 +83,22 @@ const url = "https://script.google.com/macros/s/AKfycbz9_CXn43gr7m-SD44BykaB-Pgo
 
 function send(){
 
-if(!name.value || !course.value || !year.value || !type.value){
-msg.innerText = "⚠️ عبي كل الحقول";
+let nameVal = document.getElementById("name").value;
+let courseVal = document.getElementById("course").value;
+let yearVal = document.getElementById("year").value;
+let typeVal = document.getElementById("type").value;
+
+if(!nameVal || !courseVal || !yearVal || !typeVal){
+document.getElementById("msg").innerText = "⚠️ عبي كل الحقول";
 return;
 }
 
 let d = new URLSearchParams();
 
-d.append("name", name.value);
-d.append("course", course.value);
-d.append("year", year.value);
-d.append("type", type.value);
+d.append("name", nameVal);
+d.append("course", courseVal);
+d.append("year", yearVal);
+d.append("type", typeVal);
 
 fetch(url,{
 method:"POST",
@@ -101,12 +106,12 @@ body:d,
 mode:"no-cors"
 })
 .then(()=>{
-msg.innerText = "✅ تم الحفظ";
+document.getElementById("msg").innerText = "✅ تم الحفظ";
 
-name.value = "";
-course.value = "";
-year.value = "";
-type.value = "";
+document.getElementById("name").value = "";
+document.getElementById("course").value = "";
+document.getElementById("year").value = "";
+document.getElementById("type").value = "";
 
 setTimeout(loadData, 1000);
 });
@@ -134,7 +139,7 @@ document.querySelector("#table tbody").innerHTML = rows;
 
 })
 .catch(() => {
-msg.innerText = "❌ تأكد من نشر السكربت";
+document.getElementById("msg").innerText = "❌ تأكد من نشر السكربت";
 });
 }
 
