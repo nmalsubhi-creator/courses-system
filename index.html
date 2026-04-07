@@ -5,18 +5,53 @@
 <title>نظام الدورات</title>
 
 <style>
-body {font-family: Arial; direction: rtl; text-align:center; background:#f5f5f5;}
-.container {background:white; padding:20px; margin:20px auto; width:90%; max-width:700px; border-radius:10px;}
-input, button {width:90%; padding:10px; margin:5px;}
-button {background:#007bff; color:white; border:none; cursor:pointer;}
-table {width:100%; margin-top:15px; border-collapse: collapse;}
-td, th {border:1px solid #ccc; padding:8px;}
+body {
+    font-family: Arial;
+    direction: rtl;
+    text-align: center;
+    background: #f5f5f5;
+}
+
+.container {
+    background: white;
+    padding: 20px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 700px;
+    border-radius: 10px;
+}
+
+input, button {
+    width: 90%;
+    padding: 10px;
+    margin: 5px;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
 </style>
 
 </head>
+
 <body>
 
 <div class="container">
+
 <h2>📋 تسجيل دورة</h2>
 
 <input id="name" placeholder="اسم الموظف">
@@ -46,8 +81,13 @@ td, th {border:1px solid #ccc; padding:8px;}
 <script>
 const url = "https://script.google.com/macros/s/AKfycbz9_CXn43gr7m-SD44BykaB-PgoOJamWLA3QrGxvPIuggeEL0QjaPIh1FvchOlDG5kxCQ/exec";
 
-// إرسال
 function send(){
+
+if(!name.value || !course.value || !year.value || !type.value){
+msg.innerText = "⚠️ عبي كل الحقول";
+return;
+}
+
 let d = new URLSearchParams();
 
 d.append("name", name.value);
@@ -55,31 +95,50 @@ d.append("course", course.value);
 d.append("year", year.value);
 d.append("type", type.value);
 
-fetch(url,{method:"POST", body:d})
-.then(()=> {
-msg.innerText="✅ تم الحفظ";
-loadData();
+fetch(url,{
+method:"POST",
+body:d,
+mode:"no-cors"
+})
+.then(()=>{
+msg.innerText = "✅ تم الحفظ";
+
+name.value = "";
+course.value = "";
+year.value = "";
+type.value = "";
+
+setTimeout(loadData, 1000);
 });
 }
 
-// عرض البيانات
 function loadData(){
 fetch(url)
-.then(res=>res.json())
-.then(data=>{
-let rows="";
-data.forEach(d=>{
-rows+=`
+.then(res => res.json())
+.then(data => {
+
+let rows = "";
+
+data.forEach(d => {
+rows += `
 <tr>
-<td>${d.name}</td>
-<td>${d.course}</td>
-<td>${d.year}</td>
-<td>${d.type}</td>
-</tr>`;
+<td>${d.name || ""}</td>
+<td>${d.course || ""}</td>
+<td>${d.year || ""}</td>
+<td>${d.type || ""}</td>
+</tr>
+`;
 });
-table.querySelector("tbody").innerHTML=rows;
+
+document.querySelector("#table tbody").innerHTML = rows;
+
+})
+.catch(() => {
+msg.innerText = "❌ تأكد من نشر السكربت";
 });
 }
+
+loadData();
 </script>
 
 </body>
