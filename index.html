@@ -32,12 +32,13 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 <div class="container">
 
 <div class="card">
+  <h3>إضافة دورة</h3>
 <input id="name" placeholder="اسم الموظف">
 <input id="course" placeholder="الدورة">
 <input id="year" placeholder="السنة">
 <input id="type" placeholder="النوع">
 
-<button class="btn-save" onclick="save()">حفظ</button>
+<button "btn-save" onclick="add"حفظ</button>
 <p id="msg"></p>
 </div>
 
@@ -66,7 +67,12 @@ td,th {border:1px solid #ddd; padding:8px; text-align:center;}
 
 <script>
 const url = "https://script.google.com/macros/s/AKfycbz9_CXn43gr7m-SD44BykaB-PgoOJamWLA3QrGxvPIuggeEL0QjaPIh1FvchOlDG5kxCQ/exec";
-
+url,{method:"POST",body:d,mode:"no-cors"})
+.then(()=>{
+msg.innerText="✅ تم الحفظ";
+load();
+});
+}
 let editId = null;
 let allData = [];
 
