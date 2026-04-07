@@ -54,13 +54,20 @@ td, th {
 
 <h2>📋 تسجيل دورة</h2>
 
-<input id="name" placeholder="اسم الموظف">
-<input id="course" placeholder="اسم الدورة">
-<input id="year" placeholder="السنة">
-<input id="type" placeholder="نوع الدورة">
+<form method="POST"
+action="https://script.google.com/macros/s/AKfycbyVkcYqyrUU56kk-oTXDWI1ZQUqGW2d1QhEENqVFBVjRKW7IYrbC46cgR6H_2pmFvp7/exec"
+target="hidden_iframe">
 
-<button onclick="send()">إرسال</button>
-<button onclick="loadData()">عرض البيانات</button>
+<input name="name" placeholder="اسم الموظف" required>
+<input name="course" placeholder="اسم الدورة" required>
+<input name="year" placeholder="السنة" required>
+<input name="type" placeholder="نوع الدورة" required>
+
+<button type="submit">إرسال</button>
+
+</form>
+
+<iframe name="hidden_iframe" style="display:none;"></iframe>
 
 <p id="msg"></p>
 
