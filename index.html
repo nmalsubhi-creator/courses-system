@@ -2,174 +2,84 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>نظام إدارة الدورات الرسمي</title>
+<title>نظام الدورات</title>
 
 <style>
-body {font-family:tahoma; direction:rtl; background:#eef2f7;}
-.header {background:#0b3d2e; color:#fff; padding:15px; text-align:center;}
-
-.container {max-width:1100px; margin:auto;}
-.card {background:#fff; padding:15px; margin:10px; border-radius:10px;}
-
-input {width:100%; padding:10px; margin:5px 0;}
-
-button {padding:8px; border:none; border-radius:5px; cursor:pointer;}
-.btn-save {background:#0b3d2e; color:#fff;}
-.btn-del {background:red; color:#fff;}
-.btn-edit {background:orange; color:#fff;}
-.btn-print {background:#007bff; color:#fff;}
-
-table {width:100%; border-collapse:collapse;}
-th {background:#0b3d2e; color:#fff;}
-td,th {border:1px solid #ddd; padding:8px; text-align:center;}
+body {font-family: Arial; direction: rtl; text-align:center; background:#f5f5f5;}
+.container {background:white; padding:20px; margin:20px auto; width:90%; max-width:700px; border-radius:10px;}
+input, button {width:90%; padding:10px; margin:5px;}
+button {background:#007bff; color:white; border:none; cursor:pointer;}
+table {width:100%; margin-top:15px; border-collapse: collapse;}
+td, th {border:1px solid #ccc; padding:8px;}
 </style>
-</head>
 
+</head>
 <body>
 
-<div class="header">🏛️ نظام إدارة الدورات</div>
-
 <div class="container">
+<h2>📋 تسجيل دورة</h2>
 
-<div class="card">
-  <h3>إضافة دورة</h3>
 <input id="name" placeholder="اسم الموظف">
-<input id="course" placeholder="الدورة">
+<input id="course" placeholder="اسم الدورة">
 <input id="year" placeholder="السنة">
-<input id="type" placeholder="النوع">
+<input id="type" placeholder="نوع الدورة">
 
-<button "btn-save" onclick="add"حفظ
- 
-</div>
+<button onclick="send()">إرسال</button>
+<button onclick="loadData()">عرض البيانات</button>
 
-<div
- id="table"
+<p id="msg"></p>
 
+<table id="table">
+<thead>
 <tr>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
-<th></th>
+<th>الاسم</th>
+<th>الدورة</th>
+<th>السنة</th>
+<th>النوع</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
-</div>
 
 </div>
 
 <script>
 const url = "https://script.google.com/macros/s/AKfycbz9_CXn43gr7m-SD44BykaB-PgoOJamWLA3QrGxvPIuggeEL0QjaPIh1FvchOlDG5kxCQ/exec";
-url,{method:"POST",body:d,mode:"no-cors"})
-.then(()=>{
+
+// إرسال
+function send(){
+let d = new URLSearchParams();
+
+d.append("name", name.value);
+d.append("course", course.value);
+d.append("year", year.value);
+d.append("type", type.value);
+
+fetch(url,{method:"POST", body:d})
+.then(()=> {
 msg.innerText="✅ تم الحفظ";
-load();
+loadData();
 });
 }
-let editId = null;
-let allData = [];
 
-// حفظ (إضافة + تعديل)
-function save(){
-  if(!name.value || !course.value){
-    msg.innerText="⚠️ عبئ البيانات";
-    return;
-  }
-
-  let d=new URLSearchParams();
-
-  if(editId){
-    d.append("action","edit");
-    d.append("id",editId);
-  } else {
-    d.append("action","add");
-  }
-
-  d.append("name",name.value);
-  d.append("course",course.value);
-  d.append("year",year.value);
-  d.append("type",type.value);
-
-  fetch(url,{method:"POST",body:d})
-  .then(()=>{
-    msg.innerText="✅ تم الحفظ";
-    clearForm();
-    load();
-  });
+// عرض البيانات
+function loadData(){
+fetch(url)
+.then(res=>res.json())
+.then(data=>{
+let rows="";
+data.forEach(d=>{
+rows+=`
+<tr>
+<td>${d.name}</td>
+<td>${d.course}</td>
+<td>${d.year}</td>
+<td>${d.type}</td>
+</tr>`;
+});
+table.querySelector("tbody").innerHTML=rows;
+});
 }
-
-// حذف
-function del(id){
-  if(confirm("حذف؟")){
-    let d=new URLSearchParams();
-    d.append("action","delete");
-    d.append("id",id);
-
-    fetch(url,{method:"POST",body:d})
-    .then(()=>load());
-  }
-}
-
-// تعديل
-function edit(d){
-  name.value = d.name;
-  course.value = d.course;
-  year.value = d.year;
-  type.value = d.type;
-
-  editId = d.id;
-}
-
-// تحميل
-function load(){
-  fetch(url)
-  .then(r=>r.json())
-  .then(data=>{
-    allData=data;
-    render(data);
-  });
-}
-
-// عرض
-function render(data){
-  let rows="";
-
-  data.forEach(d=>{
-    rows+=`
-    <tr>
-    <td>${d.id}</td>
-    <td>${d.name}</td>
-    <td>${d.course}</td>
-    <td>${d.year}</td>
-    <td>${d.type}</td>
-    <td>
-    <button class="btn-edit" onclick='edit(${JSON.stringify(d)})'>تعديل</button>
-    <button class="btn-del" onclick="del('${d.id}')">حذف</button>
-    </td>
-    </tr>`;
-  });
-
-  document.querySelector("#table tbody").innerHTML=rows;
-}
-
-// بحث
-function filter(){
-  let v=search.value.toLowerCase();
-  render(allData.filter(d=>d.name.toLowerCase().includes(v)));
-}
-
-// تنظيف
-function clearForm(){
-  name.value="";
-  course.value="";
-  year.value="";
-  type.value="";
-  editId=null;
-}
-
-load();
 </script>
 
 </body>
