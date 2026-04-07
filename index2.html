@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>نظام الدورات</title>
+
+<style>
+body {
+    font-family: Arial;
+    direction: rtl;
+    text-align: center;
+    background: #f5f5f5;
+}
+
+.container {
+    background: white;
+    padding: 20px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 10px;
+}
+
+input, select, button {
+    width: 90%;
+    padding: 10px;
+    margin: 5px;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    margin-top: 15px;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+/* 🖨️ الطباعة */
+@media print {
+body * { visibility: hidden; }
+
+#printArea, #printArea * {
+    visibility: visible;
+}
+
+#printArea {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+}
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📋 تسجيل دورة</h2>
+
+<input id="name" placeholder="اسم الموظف">
+<input id="course" placeholder="اسم الدورة">
+<input id="year" placeholder="السنة">
+
+<!-- نوع الدورة -->
+<select id="type" onchange="toggleOther()">
+<option value="">اختر نوع الدورة</option>
+<option>مهنية</option>
+<option>تقنية</option>
+<option>تخصصية</option>
+<option>أخرى</option>
+</select>
+
+<!-- يظهر فقط عند "أخرى" -->
+<input id="otherType" placeholder="اكتب نوع الدورة" style="display:none;">
+
+<button onclick="send()">إرسال</button>
+<button onclick="loadData()">عرض البيانات</button>
+<button onclick="printData()">🖨️ طباعة</button>
+
+<p id="msg"></p>
+
+<!-- 📊 الإحصائيات -->
+<div id="stats"></div>
+
+<!-- 🖨️ منطقة الطباعة -->
+<div id="printArea">
+<table id="table">
+<thead>
+<tr>
+<th>الاسم</th>
+<th>الدورة</th>
+<th>السنة</th>
+<th>النوع</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+const url = "https://script.google.com/macros/s/AKfycbzBu5dCQYwOVUb6wzFDg-u7kroQ3J1kTcdtkJt_2w3UHlVeY8Y9QsA20iLa_ikhy8Xigg/exec";
+
+// إظهار خانة أخرى
+function toggleOther(){
+let type = document.getElementById("type").value;
+document.getElementById("otherType").style.display = (type === "أخرى") ? "block" : "none";
+}
+
+// إرسال
+function send(){
+
+let name = document.getElementById("name").value;
+let course = document.getElementById("course").value;
+let year = document.getElementById("year").value;
+let type = document.getElementById("type").value;
+let other = document.getElementById("otherType").value;
+
+if(type === "أخرى") type = other;
+
+if(!name || !course || !year || !type){
+document.getElementById("msg").innerText = "⚠️ عبي كل الحقول";
+return;
+}
+
+let d = new URLSearchParams();
+d.append("name", name);
+d.append("course", course);
+d.append("year", year);
+d.append("type", type);
+
+fetch(url,{method:"POST", body:d})
+.then(()=>{
+document.getElementById("msg").innerText = "✅ تم الحفظ";
+loadData();
+});
+}
+
+// عرض + إحصائيات
+function loadData(){
+fetch(url)
+.then(res=>res.json())
+.then(data=>{
+
+let rows="";
+let statsByName = {};
+let statsByType = {};
+
+data.forEach(d=>{
+
+// جدول
+rows+=`
+<tr>
+<td>${d.name}</td>
+<td>${d.course}</td>
+<td>${d.year}</td>
+<td>${d.type}</td>
+</tr>`;
+
+// إحصاء موظف
+statsByName[d.name] = (statsByName[d.name] || 0) + 1;
+
+// إحصاء نوع
+statsByType[d.type] = (statsByType[d.type] || 0) + 1;
+
+});
+
+document.querySelector("#table tbody").innerHTML=rows;
+
+// عرض الإحصائيات
+let statsHTML = "<h3>📊 الإحصائيات</h3>";
+
+statsHTML += "<b>عدد الدورات لكل موظف:</b><br>";
+for(let n in statsByName){
+statsHTML += n + " : " + statsByName[n] + "<br>";
+}
+
+statsHTML += "<br><b>عدد الدورات حسب النوع:</b><br>";
+for(let t in statsByType){
+statsHTML += t + " : " + statsByType[t] + "<br>";
+}
+
+document.getElementById("stats").innerHTML = statsHTML;
+
+});
+}
+
+// طباعة
+function printData(){
+window.print();
+}
+
+// تحميل تلقائي
+loadData();
+</script>
+
+</body>
+</html>
